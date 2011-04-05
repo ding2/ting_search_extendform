@@ -32,9 +32,6 @@ function ting_search_extendform_admin_settings() {
 }
 
 function ting_search_extendform_admin_settings_validate($form, &$form_state) {
-  dpm($form); 
-  dpm($form_state);
-
   $s = '';
   if(isset($form_state['values']['ting_search_extendform_creator_index'])) {
     $s = $form_state['values']['ting_search_extendform_creator_index'];

@@ -11,7 +11,7 @@
  * @brief Implementation of hook_menu()
  */
 function ting_search_extendform_menu() {
-  $items['admin/config/ting/searchextendform'] = 
+  $items['admin/config/ting/tingsearchextendform'] = 
     array(
       'title' => 'Extended search form settings',
       'description' => 'Change how the extended search form behaves',
@@ -19,19 +19,27 @@ function ting_search_extendform_menu() {
       'page arguments' => array('ting_search_extendform_admin_settings'),
       'access arguments' => array('administer ting settings'),
       'type' => MENU_NORMAL_ITEM,
-      'file' => 'searchextendform.admin.inc'
+      'file' => 'ting_search_extendform.admin.inc'
           );
 
   return $items;
+}
+
+function ting_search_extendform_form_search_form_alter(&$form, &$form_state, $form_id) {
+  unset($form['basic']);
+  unset($form['advanced']);
+  return $form;
 }
 
 /**
  * @brief Implementation of hook_form_FORM_ID_alter() for form search_block_form.
  */
 function ting_search_extendform_form_search_block_form_alter(&$form, &$form_state, $form_id) {
+  $form['search_block_form']['#default_value'] = isset($_GET['text']) ? $_GET['text'] : '';
+  
   $form['advanced_search'] = 
     array('#type' => 'fieldset',
-          '#title' => t('Advanseret'),
+          '#title' => t('Advanced'),
           '#collapsible' => TRUE,
           '#collapsed' => TRUE,
       	  '#attributes' => array('class' => array('extendsearch-advanced')),
@@ -44,27 +52,107 @@ function ting_search_extendform_form_search_block_form_alter(&$form, &$form_stat
       '#suffix' => '</div>',
     );     
     
+  $defvalue = isset($_GET['creator']) ? $_GET['creator'] : '';
   $form['advanced_search']['fields']['ting_search_extendform_creator_field'] = 
     array('#type' => 'textfield',
-      	  '#title' => t('Forfatter:'),
-      	  '#size' => 30,
+          '#title' => t('Author'),
+          '#default_value' => $defvalue,
+          '#size' => 50,
       	  '#maxlength' => 255,
     );
+  if ($defvalue != '') {
+    $form['advanced_search']['#collapsed'] = FALSE;
+  }
+  
+  $defvalue = isset($_GET['title']) ? $_GET['title'] : '';
   $form['advanced_search']['fields']['ting_search_extendform_title_field'] = 
     array('#type' => 'textfield',
-      	  '#title' => t('Titel:'),
-      	  '#prefix' => '<br/>',
-    	  '#size' => 30,
+          '#title' => t('Title'),
+          '#default_value' => $defvalue,
+          '#prefix' => '<br/>',
+    	    '#size' => 50,
       	  '#maxlength' => 255,
     );
+  if ($defvalue != '') {
+    $form['advanced_search']['#collapsed'] = FALSE;
+  }
+  
+  $defvalue = isset($_GET['subject']) ? $_GET['subject'] : '';
   $form['advanced_search']['fields']['ting_search_extendform_subject_field'] = 
     array('#type' => 'textfield',
-      	  '#title' => t('Emne:'),
-      	  '#prefix' => '<br/>',
-    	  '#size' => 30,
+          '#title' => t('Subjects'),
+          '#default_value' => $defvalue,
+          '#prefix' => '<br/>',
+    	    '#size' => 50,
       	  '#maxlength' => 255,
     );
-	  
-  dpm($form);
+  if ($defvalue != '') {
+    $form['advanced_search']['#collapsed'] = FALSE;
+  }
+
+  $form['#submit'] = array('ting_search_extendform_submit');
+    
   return $form;
+}
+
+/**
+ * Process a block search form submission.
+ */
+function ting_search_extendform_submit($form, &$form_state) {
+  // The search form relies on control of the redirect destination for its
+  // functionality, so we override any static destination set in the request,
+  // for example by drupal_access_denied() or drupal_not_found()
+  // (see http://drupal.org/node/292565).
+  if (isset($_GET['destination'])) {
+    unset($_GET['destination']);
+  }
+ 
+  $form_id = $form['form_id']['#value'];
+  $terms = $form_state['values'][$form_id];
+  $fields = array();
+  $args = array('text' => $form_state['values']['search_block_form']);
+  
+  $s = $form_state['values']['ting_search_extendform_creator_field'];
+  if( $s != "" ) {
+    $args['creator'] = $s;
+    $fields[] = sprintf('%s=%s', 'dc.creator', $s);
+  }
+  $s = $form_state['values']['ting_search_extendform_title_field'];
+  if( $s != "" ) {
+    $args['title'] = $s;
+    $fields[] = sprintf('%s=%s', 'dc.title', $s);    
+  }
+  $s = $form_state['values']['ting_search_extendform_subject_field'];
+  if( $s != "" ) {
+    $args['subject'] = $s;
+    $fields[] = sprintf('%s=%s', 'dc.subject', $s);    
+  }
+  
+  $q = implode(' AND ', $fields);
+  if($q == '') {
+    $q = $terms;
+  }
+  else if($terms != '') {    
+    $q = sprintf('%s AND (%s)', $terms, $q);
+  }
+  
+  // Check to see if the form was submitted empty.
+  // If it is empty, display an error message.
+  // (This method is used instead of setting #required to TRUE for this field
+  // because that results in a confusing error message.  It would say a plain
+  // "field is required" because the search keywords field has no title.
+  // The error message would also complain about a missing #title field.)
+  if ($q == '') {
+    form_set_error('keys', t('Please enter some keywords.'));
+  }
+  
+  $info = search_get_default_module_info();
+  if ($info) {
+    $form_state['redirect'] = FALSE;
+    $url = 'search/' . $info['path'] . '/' . trim($q);
+    drupal_goto($url, array('query' => $args));
+  }
+  else {
+    form_set_error(NULL, t('Search is currently disabled.'), 'error');
+  }
 }
