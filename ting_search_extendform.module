@@ -32,8 +32,6 @@ function ting_search_extendform_form_ting_admin_register_settings_alter(&$form, 
   $form['#validate'][] = 'ting_search_extendform_admin_register_settings_validate';
   $form['#submit'][] = 'ting_search_extendform_admin_register_settings_submit';
   
-  dpm($form);
-  dpm($form_state);
   return $form;
 }
 
