@@ -7,22 +7,66 @@
  * Adds several input fields to search in specific indexes.
  */
 
-/**
- * @brief Implementation of hook_menu()
- */
-function ting_search_extendform_menu() {
-  $items['admin/config/ting/tingsearchextendform'] = 
-    array(
-      'title' => 'Extended search form settings',
-      'description' => 'Change how the extended search form behaves',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('ting_search_extendform_admin_settings'),
-      'access arguments' => array('administer ting settings'),
-      'type' => MENU_NORMAL_ITEM,
-      'file' => 'ting_search_extendform.admin.inc'
-          );
+function ting_search_extendform_form_ting_admin_register_settings_alter(&$form, &$form_state, $form_id) {
+  $form['ting_search_extendform_creator_index'] = 
+    array('#type' => 'textfield',
+	  '#title' => t('Forfatter'),
+	  '#description' => t('Angiv navn på det register, som indeholder forfatternavn. F.eks. dc.creator'),
+	  '#default_value' => variable_get('ting_search_extendform_creator_index', 'dc.creator')
+	  );
+	  
+  $form['ting_search_extendform_title_index'] = 
+    array('#type' => 'textfield',
+	  '#title' => t('Titel'),
+	  '#description' => t('Angiv navn på det register, som indeholder titler. F.eks. dc.title'),
+	  '#default_value' => variable_get('ting_search_extendform_title_index', 'dc.title')
+	  );
 
-  return $items;
+  $form['ting_search_extendform_subject_index'] = 
+    array('#type' => 'textfield',
+	  '#title' => t('Emneord'),
+	  '#description' => t('Angiv navn på det register, som indeholder emneord. F.eks. dc.subject'),
+	  '#default_value' => variable_get('ting_search_extendform_subject_index', 'dc.subject')
+	  );
+
+  $form['#validate'][] = 'ting_search_extendform_admin_register_settings_validate';
+  $form['#submit'][] = 'ting_search_extendform_admin_register_settings_submit';
+  
+  dpm($form);
+  dpm($form_state);
+  return $form;
+}
+
+function ting_search_extendform_admin_register_settings_validate($form, &$form_state) {
+  $s = '';
+  if(isset($form_state['values']['ting_search_extendform_creator_index'])) {
+    $s = $form_state['values']['ting_search_extendform_creator_index'];
+  }
+  if($s == '') {
+    form_set_error('ting_search_extendform_creator_index', t('Please enter a register to use with creator.'));
+  }
+  
+  $s = '';
+  if(isset($form_state['values']['ting_search_extendform_title_index'])) {
+    $s = $form_state['values']['ting_search_extendform_title_index'];
+  }
+  if($s == '') {
+    form_set_error('ting_search_extendform_title_index', t('Please enter a register to use with title.'));
+  }
+
+  $s = '';
+  if(isset($form_state['values']['ting_search_extendform_subject_index'])) {
+    $s = $form_state['values']['ting_search_extendform_subject_index'];
+  }
+  if($s == '') {
+    form_set_error('ting_search_extendform_subject_index', t('Please enter a register to use with subjects.'));
+  }
+}
+
+function ting_search_extendform_admin_register_settings_submit($form, $form_state) {
+  variable_set('ting_search_extendform_creator_index', $form_state['values']['ting_search_extendform_creator_index']);
+  variable_set('ting_search_extendform_title_index', $form_state['values']['ting_search_extendform_title_index']);
+  variable_set('ting_search_extendform_subject_index', $form_state['values']['ting_search_extendform_subject_index']);
 }
 
 function ting_search_extendform_form_search_form_alter(&$form, &$form_state, $form_id) {
@@ -115,17 +159,17 @@ function ting_search_extendform_submit($form, &$form_state) {
   $s = $form_state['values']['ting_search_extendform_creator_field'];
   if( $s != "" ) {
     $args['creator'] = $s;
-    $fields[] = sprintf('%s=%s', 'dc.creator', $s);
+    $fields[] = sprintf('%s=%s', variable_get('ting_search_extendform_creator_index', 'dc.creator'), $s);
   }
   $s = $form_state['values']['ting_search_extendform_title_field'];
   if( $s != "" ) {
     $args['title'] = $s;
-    $fields[] = sprintf('%s=%s', 'dc.title', $s);    
+    $fields[] = sprintf('%s=%s', variable_get('ting_search_extendform_title_index', 'dc.title'), $s);    
   }
   $s = $form_state['values']['ting_search_extendform_subject_field'];
   if( $s != "" ) {
     $args['subject'] = $s;
-    $fields[] = sprintf('%s=%s', 'dc.subject', $s);    
+    $fields[] = sprintf('%s=%s', variable_get('ting_search_extendform_subject_index', 'dc.subject'), $s);    
   }
   
   $q = implode(' AND ', $fields);
