@@ -8,55 +8,55 @@
  */
 
 function ting_search_extendform_form_ting_admin_register_settings_alter(&$form, &$form_state, $form_id) {
-  $form['ting_search_extendform_creator_index'] = 
-    array('#type' => 'textfield',
-	  '#title' => t('Forfatter'),
-	  '#description' => t('Angiv navn på det register, som indeholder forfatternavn. F.eks. dc.creator'),
-	  '#default_value' => variable_get('ting_search_extendform_creator_index', 'dc.creator')
-	  );
-	  
-  $form['ting_search_extendform_title_index'] = 
-    array('#type' => 'textfield',
-	  '#title' => t('Titel'),
-	  '#description' => t('Angiv navn på det register, som indeholder titler. F.eks. dc.title'),
-	  '#default_value' => variable_get('ting_search_extendform_title_index', 'dc.title')
-	  );
+  $form['ting_search_extendform_creator_index'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Forfatter'),
+    '#description' => t('Field that contains authername, for instance dc.creator'),
+    '#default_value' => variable_get('ting_search_extendform_creator_index', 'dc.creator')
+  );
 
-  $form['ting_search_extendform_subject_index'] = 
-    array('#type' => 'textfield',
-	  '#title' => t('Emneord'),
-	  '#description' => t('Angiv navn på det register, som indeholder emneord. F.eks. dc.subject'),
-	  '#default_value' => variable_get('ting_search_extendform_subject_index', 'dc.subject')
-	  );
+  $form['ting_search_extendform_title_index'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Titel'),
+    '#description' => t('Field that contains title, for instance dc.title'),
+    '#default_value' => variable_get('ting_search_extendform_title_index', 'dc.title')
+  );
+
+  $form['ting_search_extendform_subject_index'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Emneord'),
+    '#description' => t('Field that contains subject, for instance dc.subject'),
+    '#default_value' => variable_get('ting_search_extendform_subject_index', 'dc.subject')
+  );
 
   $form['#validate'][] = 'ting_search_extendform_admin_register_settings_validate';
   $form['#submit'][] = 'ting_search_extendform_admin_register_settings_submit';
-  
+
   return $form;
 }
 
 function ting_search_extendform_admin_register_settings_validate($form, &$form_state) {
   $s = '';
-  if(isset($form_state['values']['ting_search_extendform_creator_index'])) {
+  if (isset($form_state['values']['ting_search_extendform_creator_index'])) {
     $s = $form_state['values']['ting_search_extendform_creator_index'];
   }
-  if($s == '') {
+  if ($s == '') {
     form_set_error('ting_search_extendform_creator_index', t('Please enter a register to use with creator.'));
   }
-  
+
   $s = '';
-  if(isset($form_state['values']['ting_search_extendform_title_index'])) {
+  if (isset($form_state['values']['ting_search_extendform_title_index'])) {
     $s = $form_state['values']['ting_search_extendform_title_index'];
   }
-  if($s == '') {
+  if ($s == '') {
     form_set_error('ting_search_extendform_title_index', t('Please enter a register to use with title.'));
   }
 
   $s = '';
-  if(isset($form_state['values']['ting_search_extendform_subject_index'])) {
+  if (isset($form_state['values']['ting_search_extendform_subject_index'])) {
     $s = $form_state['values']['ting_search_extendform_subject_index'];
   }
-  if($s == '') {
+  if ($s == '') {
     form_set_error('ting_search_extendform_subject_index', t('Please enter a register to use with subjects.'));
   }
 }
@@ -78,62 +78,64 @@ function ting_search_extendform_form_search_form_alter(&$form, &$form_state, $fo
  */
 function ting_search_extendform_form_search_block_form_alter(&$form, &$form_state, $form_id) {
   $form['search_block_form']['#default_value'] = isset($_GET['text']) ? $_GET['text'] : '';
-  
-  $form['advanced_search'] = 
-    array('#type' => 'fieldset',
-          '#title' => t('Advanced'),
-          '#collapsible' => TRUE,
-          '#collapsed' => TRUE,
-      	  '#attributes' => array('class' => array('extendsearch-advanced')),
-      	  '#prefix' => '<br/>'
-         );
 
-  $form['advanced_search']['fields'] =
-    array(
-      '#prefix' => '<div class="fields">',
-      '#suffix' => '</div>',
-    );     
-    
+  $form['advanced_search'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#attributes' => array('class' => array('extendsearch-advanced')),
+    '#prefix' => '<br/>'
+  );
+
+  $form['advanced_search']['fields'] = array(
+    '#prefix' => '<div class="fields">',
+    '#suffix' => '</div>',
+  );
+
   $defvalue = isset($_GET['creator']) ? $_GET['creator'] : '';
-  $form['advanced_search']['fields']['ting_search_extendform_creator_field'] = 
-    array('#type' => 'textfield',
-          '#title' => t('Author'),
-          '#default_value' => $defvalue,
-          '#size' => 50,
-      	  '#maxlength' => 255,
-    );
+  $form['advanced_search']['fields']['ting_search_extendform_creator_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Author'),
+    '#default_value' => $defvalue,
+    '#size' => 50,
+    '#maxlength' => 255,
+  );
+
   if ($defvalue != '') {
     $form['advanced_search']['#collapsed'] = FALSE;
   }
-  
+
   $defvalue = isset($_GET['title']) ? $_GET['title'] : '';
-  $form['advanced_search']['fields']['ting_search_extendform_title_field'] = 
-    array('#type' => 'textfield',
-          '#title' => t('Title'),
-          '#default_value' => $defvalue,
-          '#prefix' => '<br/>',
-    	    '#size' => 50,
-      	  '#maxlength' => 255,
-    );
+  $form['advanced_search']['fields']['ting_search_extendform_title_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => $defvalue,
+    '#prefix' => '<br/>',
+    '#size' => 50,
+    '#maxlength' => 255,
+  );
+
   if ($defvalue != '') {
     $form['advanced_search']['#collapsed'] = FALSE;
   }
-  
+
   $defvalue = isset($_GET['subject']) ? $_GET['subject'] : '';
-  $form['advanced_search']['fields']['ting_search_extendform_subject_field'] = 
-    array('#type' => 'textfield',
-          '#title' => t('Subjects'),
-          '#default_value' => $defvalue,
-          '#prefix' => '<br/>',
-    	    '#size' => 50,
-      	  '#maxlength' => 255,
-    );
+  $form['advanced_search']['fields']['ting_search_extendform_subject_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subjects'),
+    '#default_value' => $defvalue,
+    '#prefix' => '<br/>',
+    '#size' => 50,
+    '#maxlength' => 255,
+  );
+
   if ($defvalue != '') {
     $form['advanced_search']['#collapsed'] = FALSE;
   }
 
   $form['#submit'] = array('ting_search_extendform_submit');
-    
+
   return $form;
 }
 
@@ -148,36 +150,38 @@ function ting_search_extendform_submit($form, &$form_state) {
   if (isset($_GET['destination'])) {
     unset($_GET['destination']);
   }
- 
+
   $form_id = $form['form_id']['#value'];
   $terms = $form_state['values'][$form_id];
   $fields = array();
   $args = array('text' => $form_state['values']['search_block_form']);
-  
+
   $s = $form_state['values']['ting_search_extendform_creator_field'];
-  if( $s != "" ) {
+  if ( $s != "" ) {
     $args['creator'] = $s;
     $fields[] = sprintf('%s=%s', variable_get('ting_search_extendform_creator_index', 'dc.creator'), $s);
   }
+
   $s = $form_state['values']['ting_search_extendform_title_field'];
-  if( $s != "" ) {
+  if ( $s != "" ) {
     $args['title'] = $s;
-    $fields[] = sprintf('%s=%s', variable_get('ting_search_extendform_title_index', 'dc.title'), $s);    
+    $fields[] = sprintf('%s=%s', variable_get('ting_search_extendform_title_index', 'dc.title'), $s);
   }
+
   $s = $form_state['values']['ting_search_extendform_subject_field'];
-  if( $s != "" ) {
+  if ( $s != "" ) {
     $args['subject'] = $s;
-    $fields[] = sprintf('%s=%s', variable_get('ting_search_extendform_subject_index', 'dc.subject'), $s);    
+    $fields[] = sprintf('%s=%s', variable_get('ting_search_extendform_subject_index', 'dc.subject'), $s);
   }
-  
+
   $q = implode(' AND ', $fields);
-  if($q == '') {
+  if ($q == '') {
     $q = $terms;
   }
-  else if($terms != '') {    
+  elseif ($terms != '') {
     $q = sprintf('%s AND (%s)', $terms, $q);
   }
-  
+
   // Check to see if the form was submitted empty.
   // If it is empty, display an error message.
   // (This method is used instead of setting #required to TRUE for this field
@@ -187,7 +191,7 @@ function ting_search_extendform_submit($form, &$form_state) {
   if ($q == '') {
     form_set_error('keys', t('Please enter some keywords.'));
   }
-  
+
   $info = search_get_default_module_info();
   if ($info) {
     $form_state['redirect'] = FALSE;

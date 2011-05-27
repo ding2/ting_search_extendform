@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Test of the extended search form.
+ */
+
 class TingSearchExtendFormTestCase extends DrupalUnitTestCase {
   const ADVANCED_SEARCH_KEY = 'advanced_search';
   const FIELDS_KEY = 'fields';
@@ -13,13 +18,13 @@ class TingSearchExtendFormTestCase extends DrupalUnitTestCase {
   const PREFIX_ATTR = '#prefix';
   const SUFFIX_ATTR = '#suffix';
   const SUBMIT_ATTR = '#submit';
-  
+
   const FIELDSET_TYPE = 'fieldset';
   const TEXTFIELD_TYPE = 'textfield';
-  
+
   const TEXTFIELD_SIZE = 50;
   const TEXTFIELD_MAXSIZE = 255;
-  
+
   public static function getInfo() {
     return array(
       'name' => 'Ting search extend form',
@@ -31,11 +36,11 @@ class TingSearchExtendFormTestCase extends DrupalUnitTestCase {
   function testAlterFormInitState() {
     $form = array();
     $form_state = array();
-    
+
     ting_search_extendform_form_search_block_form_alter($form, $form_state, 'search_block_form');
-    
+
     $this->assertTrue( is_array($form) );
-    
+
     $tf = $form[self::ADVANCED_SEARCH_KEY];
     $this->assertTrue( is_array($tf) );
     $this->assertEqual( $tf[self::TYPE_ATTR], self::FIELDSET_TYPE);
@@ -44,31 +49,31 @@ class TingSearchExtendFormTestCase extends DrupalUnitTestCase {
     $this->assertTrue( $tf[self::COLLAPSED_ATTR] );
     $this->assertEqual( $tf[self::ATTRIBUTES_ATTR], array('class' => array('extendsearch-advanced')));
     $this->assertEqual( $tf[self::PREFIX_ATTR], '<br/>');
-    
+
     $this->assertTrue( is_array($form[self::ADVANCED_SEARCH_KEY][self::FIELDS_KEY]) );
-    
+
     $tf = $form[self::ADVANCED_SEARCH_KEY][self::FIELDS_KEY]['ting_search_extendform_creator_field'];
     $this->assertTrue( is_array($tf) );
     $this->assertEqual( $tf[self::TYPE_ATTR], self::TEXTFIELD_TYPE);
     $this->assertEqual( $tf[self::TITLE_ATTR], t('Author'));
     $this->assertEqual( $tf[self::SIZE_ATTR], self::TEXTFIELD_SIZE);
     $this->assertEqual( $tf[self::MAXLEN_ATTR], self::TEXTFIELD_MAXSIZE);
-    
-    
+
+
     $tf = $form[self::ADVANCED_SEARCH_KEY][self::FIELDS_KEY]['ting_search_extendform_title_field'];
     $this->assertTrue( is_array($tf) );
     $this->assertEqual( $tf[self::TYPE_ATTR], self::TEXTFIELD_TYPE);
     $this->assertEqual( $tf[self::TITLE_ATTR], t('Title'));
     $this->assertEqual( $tf[self::SIZE_ATTR], self::TEXTFIELD_SIZE);
     $this->assertEqual( $tf[self::MAXLEN_ATTR], self::TEXTFIELD_MAXSIZE);
-    
+
     $tf = $form[self::ADVANCED_SEARCH_KEY][self::FIELDS_KEY]['ting_search_extendform_subject_field'];
     $this->assertTrue( is_array($tf) );
     $this->assertEqual( $tf[self::TYPE_ATTR], self::TEXTFIELD_TYPE);
     $this->assertEqual( $tf[self::TITLE_ATTR], t('Subjects'));
     $this->assertEqual( $tf[self::SIZE_ATTR], self::TEXTFIELD_SIZE);
     $this->assertEqual( $tf[self::MAXLEN_ATTR], self::TEXTFIELD_MAXSIZE);
-  
+
     $this->assertEqual( $form[self::SUBMIT_ATTR], array('ting_search_extendform_submit'));
   }
 
